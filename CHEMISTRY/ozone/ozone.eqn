@@ -1,0 +1,10 @@
+#EQUATIONS  { stratospheric mechanism }
+//  O  + O2 = O3       : 1.630E-16;
+//  O  + O3 = 2*O2     : 4.660E-16;
+//  O2 + hv = 2O       : k3;
+//  O3 + hv = O + O2   : k4;
+
+  O        + dummy_O2 = O3            : 1.630E-16*O2;
+  O        + O3       = dummy_O2      : 4.660E-16;
+  dummy_O2 + hv       = 2O            : k(1)*O2;
+  O3       + hv       = O + dummy_O2  : k(2);

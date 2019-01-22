@@ -1,0 +1,15 @@
+CURRENT_PATH = /home/pzzhou/Documents/Research/Paper/Myself/2016/Iodine/kpp_iodine
+
+LIB = $(CURRENT_PATH)/LIB
+
+FC = f95
+
+FFLAGS = -cpp -O2 -ffree-form -ffixed-line-length-none -ffree-line-length-none
+
+# INCL = -I/usr/include
+INCL = -I$(LIB)
+
+OP = -Wl, --start-group
+CL = -Wl, --end-group
+
+CHEMISTRY_CASE = iodine

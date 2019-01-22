@@ -1,0 +1,12 @@
+#INCLUDE ozone.spc
+#INCLUDE ozone.eqn
+
+#INLINE F90_GLOBAL
+  REAL(dp) :: O2, N2, M, H2O
+  REAL(dp) :: k(2)
+#ENDINLINE
+
+#INITVALUES
+
+CFACTOR = 1.;
+dummy_O2 = 1.000E+00;

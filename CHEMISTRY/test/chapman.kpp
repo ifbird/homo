@@ -1,0 +1,8 @@
+#MODEL      chapman
+#LANGUAGE   Fortran90
+#DOUBLE     ON
+#INTEGRATOR rosenbrock
+#DRIVER     general
+#JACOBIAN   OFF
+#HESSIAN    ON
+#STOICMAT   ON

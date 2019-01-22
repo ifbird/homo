@@ -1,0 +1,121 @@
+#INCLUDE atoms { The file 'atoms' is in $KPP_HOME/models/, so you do not need to define it yourself. }
+
+#INLINE F90_GLOBAL
+  REAL(dp) :: O2, N2
+  REAL(dp) :: K01
+  REAL(dp) :: R01
+#ENDINLINE
+
+// #INITVALUES
+// 
+// CFACTOR = 1.;
+// dummy_O2 = 1.000E+00;
+
+#DEFVAR
+  dummy = IGNORE;
+  O  = IGNORE;
+  O1D = IGNORE;
+  O3 = IGNORE;
+  H = IGNORE;
+  H2O = IGNORE;
+  OH = IGNORE;
+  HO2 = IGNORE;
+  H2O2 = IGNORE;
+  HONO = IGNORE;
+  HONO2 = IGNORE;
+  HO2NO2 = IGNORE;
+  NO = IGNORE;
+  NO2 = IGNORE;
+  NO3 = IGNORE;
+  N2O3 = IGNORE;
+  N2O4 = IGNORE;
+  N2O5 = IGNORE;
+  I = IGNORE;
+  I2 = IGNORE;
+  IO = IGNORE;
+  INO = IGNORE;
+  INO2 = IGNORE;
+  HI = IGNORE;
+  IONO2 = IGNORE;
+  HOI = IGNORE;
+  OIO = IGNORE;
+  I2O2 = IGNORE;
+  HIO3 = IGNORE;
+
+#EQUATIONS
+// Ox reactions
+  O = O3              : 5.60d-34*O2*N2*((TEMP/300)**(-2.6d0))+6.00d-34*O2*O2*((TEMP/300)**(-2.6d0));
+  O1D = O             : 3.20d-11*EXP(67.0d0/TEMP)*O2 + 2.0d-11*EXP(130.0d0/TEMP)*N2;
+  O3  = O1D           : 1.070d-03 * SUN*SUN ; 
+  O + O3 = dummy      : 8.0d-12*EXP(-2060.0d0/TEMP);
+  O1D + O3 = 2O       : 2.28d-10*0.5;
+  O1D + O3 = dummy    : 2.28d-10*0.5;
+
+// HOx reactions:
+  O1D + H2O = OH + OH      : 2.14d-10;
+  OH + HO2 = H2O           : 4.80d-11*EXP(250.0d0/TEMP);
+  OH + H2O2 = HO2          : 2.90d-12*EXP(-160.0d0/TEMP);
+  OH + O3 = HO2            : 1.70d-12*EXP(-940.0d0/TEMP);
+  OH + OH = H2O + O        : 6.2d-14*(TEMP/298.0d0)**2.6d0*EXP(945.0d0/TEMP);
+  H = HO2                  : 4.3d-32*(TEMP/298)**(-1.232d0)*N2 + 3.1d-32*(TEMP/298.0)**(-1.094)*O2;
+  OH + O = dummy + H       : 2.4d-11*EXP(100/TEMP);
+  O + HO2 = OH             : 2.7d-11*EXP(222/TEMP);
+  OH + OH = H2O2           : 9.0d-31*(TEMP/300)**(-3.2d0)*N2;
+  O + H2O2 = OH +HO2       : 1.4d-12*EXP(-2000.0d0/TEMP);
+  OH + H2O2 = H2O + HO2    : 2.9d-12*EXP(-160.0d0/TEMP);
+  OH + O3 = HO2 + dummy    : 1.7d-12*EXP(-940.0d0/TEMP);
+  HO2 + HO2 = H2O2         : 2.2d-13*EXP(600.0d0/TEMP);
+//  HO2 + HO2 = dummy        : 1.9d-33*EXP(980.0d0/TEMP)*N2;  {???}
+  HO2 + O3 =OH             : 2.03d-16*(TEMP/300.0d0)**(4.57d0)*EXP(693/TEMP);
+
+
+// NOx reactions:
+  O + NO = NO2             : 1.0D-31*(TEMP/300.0)*(-1.6)*N2;
+  O + NO2 = NO             : 5.50D-12*EXP(188.0/TEMP);
+  O + NO2 = NO3            : 1.3d-31*(TEMP/300)**(-1.5)*N2;
+  O + NO3 = NO2            : 1.7d-11;
+  OH + HONO = H2O + NO2    : 2.5d-12*EXP(260.0/TEMP);
+  OH + NO2 = HONO2         : 3.2d-30*(TEMP/300.0)**(-4.5)*N2;
+  OH + NO2 = dummy         : 1.0d-31*(TEMP/300.0)**(-4.5)*N2;
+  OH + NO3 = HO2 + NO2     : 2.0d-11;
+  HO2 + NO = NO2 + OH      : 3.45D-12*EXP(270.0/TEMP);
+  HO2 + NO2 = HO2NO2       : 1.4D-31*(TEMP/300.0)**(-3.1)*N2;
+  HO2 + NO3 = dummy        : 1.9D-12;
+  HO2 + NO3 = OH + NO2     : 2.5D-12;
+  NO + O3 = NO2            : 2.07D-12*EXP(-1400.0/TEMP);
+  NO + NO2 = N2O3          : 3.1d-34*(TEMP/300.0)**(-7.7)*N2;
+  NO + NO3 = 2NO2          : 1.8d-11*EXP(110.0/TEMP);
+  NO2 + NO2 = N2O4         : 1.4d-33*(TEMP/300.0)**(-3.8)*N2;
+  NO2 + NO3 = N2O5         : 3.6d-30*(TEMP/300.0)**(-4.1)*N2;
+
+
+// inorganic IOx
+  O + I2 = IO + I            : 1.25D-10;  {298K}
+  O + IO = dummy + I         : 1.4d-10;  {298K}
+  I + HO2 = HI + dummy       : 1.5d-11*EXP(-1090.0/TEMP);
+  I + O3 = IO + dummy        : 2.1d-11*EXP(-830.0/TEMP);  {230-370}
+  I + NO = INO               : 1.7d-11;
+  I + NO2 = INO2             : 3.0d-31*(TEMP/300.0)**(-1)*O2+3.0D-31*(TEMP/300.0)**(-1)*N2;
+  I + NO3 = IO + NO2         : 1.0d-10;  {298K}
+  I2 + NO3 =I +IONO2         : 1.5d-12;  {298K}
+  OH + HI = H2O + I          : 1.6d-11*EXP(440.0/TEMP);
+  OH + I2 = HOI + I          : 2.1d-10;  {240-350}
+  IO + NO3 = OIO + NO2       : 9.0d-12;  {298K}
+  IO + HO2 = HOI + dummy     : 1.4d-11*EXP(540.0/TEMP);  {270-380}
+  IO + O3 = I + dummy        : 1.0d-15;  {298 UPPER LIMIT}
+  IO + O3 = OIO              : 2.0d-16;  {298 UPPER LIMIT}
+  IO + IO = I2               : 5.4d-11*EXP(180.0/TEMP)*0.05;
+  IO + IO = 2I               : 5.4d-11*EXP(180.0/TEMP)*0.11;
+  IO + IO = I + OIO          : 5.4d-11*EXP(180.0/TEMP)*0.38;
+  IO + IO = I2O2             : 5.4d-11*EXP(180.0/TEMP)*0.46;
+  IO + NO = I +NO2           : 7.15D-12*EXP(300.0/TEMP);
+  IO + NO2 = IONO2           : 7.96D-31*(TEMP/298.0)**(-5.0)*O2 + 7.96D-31*(TEMP/298.0)**(-5.0)*N2;
+  INO + INO = I2 + 2NO       : 1.3D-14;  {298}
+  INO2 + INO2 = I2 + 2NO2    : 4.7D-13*EXP(-1670.0/TEMP);
+  OIO + NO = IO + NO2        : 1.1D-12*EXP(542.0/TEMP);  {240-320}
+  HI + IO = HOI +I           : 2.07D-13*(TEMP/298)**2.36*EXP(-5.6d0/R01/TEMP);
+  OH + HOI = H2O + IO        : 3.72D-16*(TEMP/298)**4.33*EXP(19.0d0/R01/TEMP);
+
+// HIO3
+  OIO + OH = HIO3    : 5.5D-10*EXP(0.36/R01/TEMP);
+  IO + HO2 = HIO3    : K01;
