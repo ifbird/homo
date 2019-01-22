@@ -1,3 +1,5 @@
+HOMO - a Handy atmOspheric MOdel
+
 1. Set CURRENT_PATH to where you install the model in 'M_DEF'.
 
 2. If you want to create a new chemistry scheme 'chemnew', you need to first create a new folder with the same name under the folder 'CURRENT_PATH/CHEMISTRY'.
