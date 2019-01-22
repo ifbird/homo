@@ -1,2 +1,3 @@
 LIB/*.o
 LIB/*.mod
+LIB/*.a
