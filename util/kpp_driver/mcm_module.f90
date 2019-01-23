@@ -161,8 +161,8 @@ CONTAINS
   !                                                             
   !ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-  SUBROUTINE chemistry(CONS, TIME_kpp, END_kpp, tmcontr, year_int, month_int, nxodrad, Tp, Pr, ZSD_in, SUN_PAR_LAYER, &
-       RES1, RES2, q_H2O, H2O, RO2_out, J_values, K_values, chem_glo, STATION, Aground, I_ACF_out)
+  SUBROUTINE chemistry(C_inout, TSTART_in, TEND_in, year_int, month_int, TEMP_in, PRESS_in, ZSD_in, &
+       RES1_in, RES2_in, q_H2O, H2O_in, RO2_out, J_values, K_values, RGlob_in, Aground, I_ACF_out)
     
 
     IMPLICIT NONE
@@ -170,11 +170,9 @@ CONTAINS
     INTEGER                                         :: i20, j20, J, I, j1, loc
     INTEGER, SAVE                                   :: FIRST_CALL = 1
     INTEGER, INTENT(in)                             :: year_int,           & ! What year your simulation is done for
-                                                       month_int,          & ! What month your simulation is done for
-                                                       nxodrad               ! Time number for every half hour
+                                                       month_int          & ! What month your simulation is done for
 
-    CHARACTER(len=3)                                :: STATION,            & ! What station this is
-                                                       month                 ! What month this is
+    CHARACTER(len=3)                                :: month                 ! What month this is
     CHARACTER(len=4)                                :: year                  ! what year this is
     CHARACTER(len=3), SAVE                          :: month_old = 'M00'     ! So that in the very beginning of the program, month_old initial 
                                                                              ! value matches no real month (real month values are 'M01' ... 'M12')
@@ -184,31 +182,25 @@ CONTAINS
                                                        M_Air  = 28.97d0,     & ! Average molar mass of air in g / mol
                                                        M_H2O  = 18.0153d0      ! Molar mass of water in g / mol
 
-    REAL(kind=dp)                                   :: ZSD,                & ! Solar zenith angle
-                                                       Air,                & ! Concentration of air molecules
+    REAL(kind=dp)                                   :: Air,                & ! Concentration of air molecules
                                                        q_H2O,              &
                                                        RH,                 & ! Relative humidity 
                                                        O2,                 & ! Concentration of O2 in molecule / cm3
                                                        N2,                 & ! Concentration of N2 in molecule / cm3
-                                                       MO2N2,              & ! Sum of O2 and N2 concentration molecule / cm3
+                                                       M,              & ! Sum of O2 and N2 concentration molecule / cm3
                                                        H2,                 & ! Concentration of H2 in molecule / cm3
-                                                       H2O,                & ! Concentration of H2O in molecule / cm3
-                                                       TEMP_KPP,           & ! Temperature used in KPP. Unit: K
-                                                       Pr_KPP,             & ! Pressure used in KPP
-                                                       ZSD_n                 ! Parameter to change ZSD from REAL to INTEGER
+                                                       H2O_in,                & ! Concentration of H2O in molecule / cm3
 
-    REAL(kind=dp), INTENT(inout)                    :: CONS(NSPEC)           ! Gas concentrations
+    REAL(kind=dp), INTENT(inout)                    :: C_inout(NSPEC)           ! Gas concentrations
 
-    REAL(kind=dp), INTENT(in)                       :: TIME_kpp,           & ! Time step in KPP
-                                                       END_kpp,            & ! End time in KPP
-                                                       RES1,               & ! 'reaction rate' for how fast H2SO4 goes to particle phase
-                                                       RES2,               & ! 'reaction rate' for how fast HNO3 goes to particle phase
-                                                       tmcontr,            & ! Time in seconds
-                                                       Tp,                 & ! temperature at this level of atmosphere
-                                                       Pr,                 & ! pressure at this level of atmosphere
+    REAL(kind=dp), INTENT(in)                       :: TSTART_in,             & ! Time step in KPP
+                                                       TEND_in,               & ! End time in KPP
+                                                       RES1_in,               & ! 'reaction rate' for how fast H2SO4 goes to particle phase
+                                                       RES2_in,               & ! 'reaction rate' for how fast HNO3 goes to particle phase
+                                                       TEMP_in,                 & ! [K], temperature at this level of atmosphere
+                                                       PRESS_in,                 & ! [Pa], pressure at this level of atmosphere
                                                        ZSD_in,             & ! Solar zenith angle
-                                                       SUN_PAR_LAYER,      & ! Penetration of radiation trough the canopy. Scales the radiation, so there is less radiation in the floor of the canopy
-                                                       chem_glo,           & ! incoming global radiation (W/m2)
+                                                       RGlob_in,           & ! incoming global radiation (W/m2)
                                                        Aground               ! ground albedo from measurements (not sure for what wl)
   
     REAL(kind=dp), INTENT(out)                      :: RO2_out               ! Concentration of peroxy radical    
@@ -228,102 +220,45 @@ CONTAINS
     IF (month_int < 10) WRITE(month,'("M0",I1)') month_int
     IF (month_int >= 10) WRITE(month,'("M",I2)') month_int
 
-    IF (STATION .EQ. 'MAN') THEN
-       IF (FIRST_CALL .EQ. 1) THEN
-          FIRST_CALL = 0
-          OPEN(unit=4,file = ''//filename1//'/General/Manitou/swr_distribution.txt',status='old')
-          READ(4,*) (swr_distribution(i20),i20=1,84)
-          CLOSE(unit=4)
-       ENDIF
+    IF (FIRST_CALL .EQ. 1) THEN
+       FIRST_CALL = 0
+       OPEN(unit=4,file=''//filename1//'/General/swr_distribution.txt',status='old')
+       READ(4,*) (swr_distribution(i20),i20=1,84)
+       CLOSE(unit=4)
     ENDIF
 
-    !IF (STATION .EQ. 'HYY') THEN  !Currently we are not using this because of
-    !non-calibrated spectral radiation data
-    !   IF (month_old /= month) THEN ! so that this is run once only when the month has changed
-    !      month_old = month
-    !      ! Input of measured spectral radiation data (every half-hour data)
-    !      OPEN(unit=4,file = ''//filename1//'/'//STATION//'/Year/'//YEAR//'/Data_input/'//MONTH//'/hyy_swr.txt',status='old')
-    !      READ(4,*)((swr_hyy(i20,j20),i20=1,47),j20=1,1488)
-    !      CLOSE(unit=4)
-    !
-    !      ! wl and ZSD dependent conversion factor from irradiance to actinic flux
-    !      OPEN(unit=4,file=''//filename1//'/General/Hyytiala/solar_factor.txt',status='old')
-    !      READ(4,*)((E_o_E(i20,j20),i20=1,45),j20=1,90)
-    !      CLOSE(unit=4)
-    !   ENDIF
-    !ENDIF
-    !***** debug for E_o_E *****!
-    ! write(*,*) E_o_E(1,:)
-    ! do i=1,45
-    !   write(*,*) i, SUM(E_o_E(i,:))
-    ! end do
-    ! write(*,*) SUM(E_o_E)
-    !***** end debug *****!
-
-    IF (STATION .EQ. 'HYY') THEN 
-       IF (FIRST_CALL .EQ. 1) THEN
-          FIRST_CALL = 0
-          OPEN(unit=4,file=''//filename1//'/General/swr_distribution.txt',status='old')
-          READ(4,*) (swr_distribution(i20),i20=1,84)
-          CLOSE(unit=4)
-       ENDIF
-    ENDIF
-
-    ! Calculation of Air, H2O, O2, N2, H2 and MO2N2 in molecule / cm3
-    ZSD      = ZSD_in
-    Air      = Pr / Tp / RG * Avog / 1.0d4 
+    ! Calculation of Air, H2O, O2, N2, H2 and M in molecule / cm3
+    Air      = PRESS_in / TEMP_in / RG * Avog * 1.0d-6 
     O2       = 0.209460d0 * Air
     N2       = 0.780840d0 * Air
     H2       = 0.5d0 * Air / 1.0d6
-    MO2N2    = O2 + N2
+    M    = O2 + N2
     H2O      = q_H2O / M_H2O * Avog / 1.0d3
     !Aground  = 0.1 ! should normally come from measurements if available
-    TEMP_KPP = Tp    ! because TEMP_KPP has type KIND=dp
-    Pr_KPP   = Pr    ! same as for temp
     RH       = 50   ! not in use at this time
 
 
-    CALL ratecons(Tp, O2, N2, MO2N2, H2O, K_values, TIME_kpp) ! Calculates the rates for complex gas-reactions 
+    CALL ratecons(Tp, O2, N2, M, H2O, K_values) ! Calculates the rates for complex gas-reactions 
 
 
     ! Calculated actinic flux from spectral data measured in Hyytiala 
-    IF (zsd .eq. 0.) THEN
-      zsd = 90.
+    IF (ZSD_in == 0.0d0) THEN
+      ZSD_in = 90.0d0
     ENDIF
  
-    if (station .eq. 'MAN') then
-      do j = 1, 75
-        I_ACF(j) = chem_glo * swr_distribution(j) * (1 + 2 * Aground * COS(ZSD*3.14/180) + Aground)
-      enddo
-    elseif (station .eq. 'HYY') then
-      !ZSD_n = ANINT(ZSD)
-      !LOC = INT(ZSD_n)
-      !DO J = 1,45 ! For solar radiation: measured data is read in for 280-500 nm.
-      !  I_ACF(J) = E_o_E(J,LOC) * SUN_PAR_LAYER / 1000.0d0 / 5.0d0 * &
-      !             (swr_hyy(J+1,nxodrad) + (tmcontr-(nxodrad-1)*1800.0d0) * (swr_hyy(J+1,nxodrad+1) - swr_hyy(J+1,nxodrad))/1800.0d0)
-      !ENDDO
-      !DO J = 46,75 ! Solar radiation for 500 nm is used for 505 - 650 nm. 
-      !  I_ACF(J) = I_ACF(45)
-      !ENDDO       
-       do j = 1, 75
-          I_ACF(j) = chem_glo * swr_distribution(j) * (1 + 2 * Aground*COS(ZSD*3.14/180) + Aground)
-       enddo
-    endif
-    
+    DO j = 1, 75
+      I_ACF(j) = RGlob_in* swr_distribution(j) * (1 + 2 * Aground*COS(ZSD_in*3.14/180) + Aground)
+    END DO
 
-    CALL PHOTOLYSIS_KPP   (tmcontr, ZSD, I_ACF, I_ACF_out, TP,                                                           &
+    CALL PHOTOLYSIS_KPP   (ZSD_in, I_ACF, I_ACF_out, TEMP_in,                                                           &
          J_values(1), J_values(2), J_values(3), J_values(4), J_values(5), J_values(6), J_values(7),                      &
          J_values(8), J_values(11), J_values(12), J_values(13), J_values(14), J_values(15), J_values(16), J_values(17),  &
          J_values(18), J_values(19), J_values(21), J_values(22), J_values(23), J_values(24), J_values(31), J_values(32), &
          J_values(33), J_values(34), J_values(35), J_values(41), J_values(51), J_values(52), J_values(53), J_values(54), &
          J_values(55), J_values(56), J_values(57), J_values(67), J_values(68), J_values(70), J_values(71)) ! Calculates J-values
 
-
-
-    IF (ZSD .GE. 90) THEN
-       DO J = 1, NPHOT
-          J_values(J) = 0.
-       ENDDO
+    IF (ZSD_in >= 90) THEN
+      J_values = 0.0d0
     ENDIF
 
     ! Some safety check
@@ -336,7 +271,7 @@ CONTAINS
     ENDDO
 
 
-    CALL KPP_Proceed(CONS, TIME_kpp, END_kpp, TEMP_KPP, RH, Pr_KPP, O2, N2, MO2N2, H2O, RES1, RES2, J_values, K_values)
+    CALL kpp_proceed(C_inout, TSTART_in, TEND_in, TEMP_in, RH_in, PRESS_in, O2_in, N2_in, M_in, H2O_in, RES1_in, RES2_in, J_values, K_values)
 
     RO2_out = RO2
 
@@ -350,7 +285,7 @@ CONTAINS
   !oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 
-  SUBROUTINE PHOTOLYSIS_KPP(tmcontr, Beta, SAFN, SAFN_out, T,       &
+  SUBROUTINE PHOTOLYSIS_KPP(Beta, SAFN, SAFN_out, T,       &
        PR1, PR2, PR3, PR4, PR5, PR6, PR7, PR8, PR11,                &
        PR12, PR13, PR14, PR15, PR16, PR17, PR18, PR19, PR21, PR22,  &
        PR23, PR24, PR31, PR32, PR33, PR34, PR35, PR41, PR51, PR52,  &
@@ -365,7 +300,6 @@ CONTAINS
     REAL(kind=dp), DIMENSION(75) :: SAFN, SAFN_out ! Actinic flux in two different units
 
     REAL(kind=dp) :: T,                                                                 & ! temperature in K
-         tmcontr,                                                                       & ! time in s
          Beta,                                                                          & ! solar zenit angle
          DL,                                                                            & ! Delta lambda (so wl band)
          VAA, VAB, VAC, VAD, h_planck, c_light,                                         & ! Dimension parameter
