@@ -1,6 +1,6 @@
-CURRENT_PATH = /home/pzzhou/Scripts/repos/homo_model/homo
+CURRENT_PATH = <path of current folder>
 
-LIB = /home/pzzhou/Scripts/repos/homo_model/lib
+LIB = <path of *.o, *.mod, *.a>
 
 FC = gfortran
 
@@ -11,5 +11,5 @@ INCL = -I$(LIB)
 OP = -Wl, --start-group
 CL = -Wl, --end-group
 
-CHEMDIR  = /home/pzzhou/Scripts/repos/homo_model/chemistry_case
-CHEMCASE = mcm
+CHEMDIR  = <path of main chemistry case folder>
+CHEMCASE = <chemistry case name, chemistry files are located as CHEMDIR/CHEMCASE/CHEMCASE_Main.f90>
