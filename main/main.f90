@@ -85,7 +85,7 @@ PROGRAM main
 
   !!!!! Open a data file and write down the initial values
   WRITE(*,'(A8,F10.3,A6)'), 'time = ', time, '  seconds'
-  OPEN(11,file="output/c.dat",status='replace',action='write')
+  OPEN(11,file="../output/c.dat",status='replace',action='write')
   WRITE(11,*) c
 
   !------------------!
