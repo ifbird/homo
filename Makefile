@@ -15,7 +15,8 @@ chemistry_obj:
 clean:
 	rm -f $(LIB)/*.o
 	rm -f $(LIB)/*.mod
-# 
+	rm -f $(LIB)/*.a
+
 # cleanall:
 # 	rm -f $(LIB)/*.a
 # 	rm -f $(LIB)/*.mod

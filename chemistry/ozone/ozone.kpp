@@ -1,6 +1,0 @@
-#MODEL      ozone
-#LANGUAGE   Fortran90
-#DOUBLE     ON
-#INTEGRATOR rosenbrock
-#DRIVER     general
-#JACOBIAN   SPARSE_LU_ROW

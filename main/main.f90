@@ -6,7 +6,7 @@ PROGRAM main
   IMPLICIT NONE
 
   ! INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(15,307)
-  REAL(dp), PARAMETER :: pi = 2*ASIN(1.)
+  REAL(dp), PARAMETER :: pi = 2*ASIN(1.0d0)
 
   REAL(dp) :: c(NSPEC)
   REAL(dp) :: k
@@ -102,7 +102,6 @@ PROGRAM main
     ! time_in_ms = FLOOR(1000*time)
     IF ( MODULO(FLOOR(time), FLOOR(output_dt)) == 0 ) THEN
       WRITE(*,'(A8,F10.3,A9)') 'time = ', time, '  seconds'
-      WRITE(*,*) RO2
       WRITE(11,*) c
     END IF
     

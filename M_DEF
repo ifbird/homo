@@ -11,4 +11,5 @@ INCL = -I$(LIB)
 OP = -Wl, --start-group
 CL = -Wl, --end-group
 
-CHEMISTRY_CASE = mcm
+CHEMDIR  = /home/pzzhou/Scripts/repos/chemistry_case
+CHEMCASE = mcm

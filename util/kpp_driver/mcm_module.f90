@@ -42,8 +42,6 @@ CONTAINS
 
     REAL(kind=dp) :: T1,T2
 
-!    T = TSTARTp
-!    TIME = T
     T1 = TSTARTp
     T2 = TENDp
 
@@ -58,14 +56,28 @@ CONTAINS
     RES2  = RES2p
     J     = Jp
 
+    ! Update_RCONST and INTEGRATE will operate on C (actually on VAR and FIX)
     C = CONS
-    ! Update_RCONST and INTEGRATE will operate on C
+
     CALL Update_RCONST()
+
+    ! In INTEGRATE VAR and FIX are calculated, so we need to put values from C to them
+    ! And FIX is meaningful only when NVAR < NSPEC
+    VAR(1:NVAR) = C(1:NVAR)
+    DO i = NVAR+1, NSPEC
+      FIX(i-NVAR) = C(i)
+    END DO
+
     CALL INTEGRATE( TIN = T1, TOUT = T2, RSTATUS_U = RSTATE, ICNTRL_U = ICNTRL )
+
+    ! Set VAR and FIX back to C
+    C(1:NVAR) = VAR(1:NVAR)
+    DO i = NVAR+1, NSPEC
+      C(i) = FIX(i-NVAR)
+    END DO
+
     CONS = C
 
-!    T = RSTATE(1)
-!    TIME = T
   END SUBROUTINE KPP_Proceed
 
 

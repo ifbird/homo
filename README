@@ -2,13 +2,15 @@ HOMO - a Handy atmOspheric MOdel
 
 1. Set CURRENT_PATH to where you install the model in 'M_DEF'.
 
-2. If you want to create a new chemistry scheme 'chemnew', you need to first create a new folder with the same name under the folder 'CURRENT_PATH/CHEMISTRY'.
+2. If you want to create a new chemistry scheme 'chemnew', you need to first create a new folder with the same name under the folder 'CURRENT_PATH/chemistry'.
 
 3. Set CHEMISTRY_CASE to 'chemnew' in 'M_DEF'.
 
 4. In the folder 'chemnew', create a 'chemnew.kpp' file and a 'chemnew.def' file.
 The 'chemnew.kpp' file is a general interface for KPP which defines some basic parameters.
-Remember to set '#MODEL' to 'chemnew', so KPP can find the correct 'def' file. 
+Remember to set '#MODEL' to 'chemnew', so KPP can find the correct 'def' file (chemnew.def).
+
+In MCM case, create a folder 'chemistry/mcm', put downloaded 'mcm_subset.def' in, and copy 'util/mcm.kpp' and 'util/mcm.def' here, too.
 
 5. Define the global variables used in KPP in the 'def' file. For example, the input concentrations of O2 and N2, the reaction rates needed to be calculated every time step.
 Write the lists of species and reactions.
@@ -17,7 +19,10 @@ Use dummy to represent O2 or N2 which are not explicitly involved in the reactio
 6. Generate chemistry fortran code:
 $ kpp chemnew.kpp
 
-7. Set parameters in MAIN/main.f90.
+In MCM case,
+$ kpp mcm.kpp
+
+7. Set parameters in main/main.f90.
 
 8. Compile the code:
 $ make
@@ -25,4 +30,4 @@ $ make
 9. Run the code:
 $ ./main.exe
 
-10. You will get all the output in 'OUTPUT/c.dat'.
+10. You will get all the output in 'output/c.dat'.
