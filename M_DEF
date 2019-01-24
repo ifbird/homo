@@ -1,6 +1,6 @@
-CURRENT_PATH = /home/pzzhou/Documents/Research/Paper/Myself/2016/Iodine/kpp_iodine
+CURRENT_PATH = /home/pzzhou/Scripts/repos/homo
 
-LIB = $(CURRENT_PATH)/LIB
+LIB = $(CURRENT_PATH)/lib
 
 FC = gfortran
 
@@ -11,4 +11,4 @@ INCL = -I$(LIB)
 OP = -Wl, --start-group
 CL = -Wl, --end-group
 
-CHEMISTRY_CASE = iodine
+CHEMISTRY_CASE = mcm

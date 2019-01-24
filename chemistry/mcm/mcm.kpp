@@ -1,0 +1,8 @@
+#MODEL      mcm
+#LANGUAGE   Fortran90
+#DOUBLE     ON
+#INTEGRATOR rosenbrock
+#DRIVER     mcm_module
+#JACOBIAN   SPARSE_LU_ROW
+#HESSIAN    OFF
+#STOICMAT   OFF

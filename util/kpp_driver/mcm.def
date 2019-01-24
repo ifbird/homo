@@ -1,0 +1,53 @@
+#INCLUDE mcm_subset.def
+
+#INITVALUES                    {Initial Values}
+CFACTOR = 1.    ;              {Conversion Factor}
+
+// Our own environmental variables, that will eventually be set.
+// There is also TEMP, although it is not defined here
+#INLINE F90_GLOBAL
+  REAL(kind=dp) :: RH,PRESS,RES1,RES2
+  ! variables
+
+  ! Photolysis rates
+  ! Reference: http://mcm.leeds.ac.uk/MCMv3.3.1/parameters/photolysis.htt
+  INTEGER, PARAMETER :: NPHOT = 71
+  REAL(kind=dp) :: J(NPHOT)
+
+  ! Complex rate coefficients
+  ! Reference: http://mcm.leeds.ac.uk/MCMv3.3.1/parameters/complex.htt
+  REAL(kind=dp) :: KMT01, KMT02, KMT03, KMT04, KMT05, KMT06, KMT07, KMT08, KMT09, KMT10
+  REAL(kind=dp) :: KMT11, KMT12, KMT13, KMT14, KMT15, KMT16, KMT17, KMT18
+  REAL(kind=dp) :: KFPAN, KBPAN, KBPPN
+
+  ! Simple rate coefficients
+  ! Reference: http://mcm.leeds.ac.uk/MCMv3.3.1/parameters/simple.htt
+  REAL(kind=dp) :: KRO2NO, KRO2HO2, KAPHO2, KAPNO, KRO2NO3, KNO3AL
+  REAL(kind=dp) :: KDEC, KROPRIM, KROSEC, KCH3O2, K298CH3O2, K14ISOM1
+
+  ! Other rate coefficients
+  REAL(kind=dp) :: K_CI, K_h2so4
+  REAL(kind=dp) :: KMT34, KMT35, KMT36, KMT37, KMT38, KMT39, KMT40, KMT41, KMT42
+  REAL(kind=dp) :: K16ISOM1, K15ISOM1
+
+  ! Variables used to calculate rate coefficients
+  REAL(kind=dp) :: F1, F10, F12, F13, F14, F15, F16, F17, F2, F3, F4, F7, F8, F9
+  REAL(kind=dp) :: FC, FC1, FC10, FC12, FC13, FC14, FC15, FC16, FC17, FC2, FC3
+  REAL(kind=dp) :: FC4, FC7, FC8, FC9, FCC, FCD, FCPPN, FD, FPPN, K1, K10, K100
+  REAL(kind=dp) :: K10I, K120, K12I, K130, K13I, K140, K14I, K150, K15I, K160
+  REAL(kind=dp) :: K16I, K170, K17I, K1I, K2, K20, K2I, K3, K30, K3I, K4, K40
+  REAL(kind=dp) :: K4I, K70, K7I, K80, K8I, K90, K9I, KC0, KCI, KD0, KDI, KPPN0
+  REAL(kind=dp) :: KPPNI, KR1, KR10, KR12, KR13, KR14, KR15, KR16, KR17, KR2
+  REAL(kind=dp) :: KR3, KR4, KR7 , KR8, KR9, KRC, KRD, KRPPN, NC, NC1, NC10
+  REAL(kind=dp) :: NC12, NC13, NC14, NC15, NC16, NC17, NC2, NC3, NC4, NC7
+  REAL(kind=dp) :: NC8, NC9, NCD, NCPPN
+#ENDINLINE
+
+#INLINE F90_INIT
+#ENDINLINE
+
+#INLINE F90_RCONST
+#ENDINLINE
+
+#INLINE F90_RATES
+#ENDINLINE
